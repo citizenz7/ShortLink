@@ -1,18 +1,18 @@
 name: CD
 on:
   push:
-    branches: [master]
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    
     env:
       SSHPASS: ${{ secrets.APP_PASS }}
 
     steps:
       - uses: actions/checkout@v2
-
+      
       - name: APT UPDATE and INSTALL SSHPASS
         run: 
           sudo apt update && sudo apt install sshpass
@@ -20,7 +20,7 @@ jobs:
       - name: deploy
         run: 
           sshpass -e ssh -o stricthostkeychecking=no ${{ secrets.APP_USER }}@${{ secrets.APP_HOST }}
-          "cd /var/www/html &&
-          sudo git pull &&
-          sudo composer install &&
-          sudo php bin/console d:m:m -n"
+          "cd public_html/ &&
+          git pull &&
+          composer install &&
+          php bin/console d:m:m -n"
