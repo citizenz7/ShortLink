@@ -11,14 +11,17 @@ jobs:
       SSHPASS: ${{ secrets.APP_PASS }}
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Git checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
 
       - name: APT UPDATE and INSTALL SSHPASS
         run:
-          sudo apt update && sudo apt install sshpass git
+          sudo apt update && sudo apt install sshpass
 
       - name: deploy
-        run:
+        run: |
           sshpass -e ssh -p 9005 -o stricthostkeychecking=no ${{ secrets.APP_USER }}@${{ secrets.APP_HOST }}
           "cd www/arakis.s2ii.xyz/ &&
           git pull &&
