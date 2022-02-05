@@ -19,7 +19,7 @@ jobs:
 
       - name: deploy
         run:
-          sshpass -e ssh -o stricthostkeychecking=no ${{ secrets.APP_USER }}@${{ secrets.APP_HOST }}
+          sshpass -e ssh -p 9005 -o stricthostkeychecking=no ${{ secrets.APP_USER }}@${{ secrets.APP_HOST }}
           "cd www/arakis.s2ii.xyz/ &&
           git pull &&
           composer install --no-progress --prefer-dist --optimize-autoloader &&
