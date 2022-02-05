@@ -18,6 +18,14 @@ jobs:
         run:
           sudo apt update && sudo apt install sshpass
 
+      - name: Make .env production file
+        uses: SpicyPizza/create-envfile@v1
+        with:
+          envkey_APP_ENV: prod
+          envkey_APP_DEBUG: false
+          envkey_DATABASE_URL: mysql://${{ secrets.APP_DB_USER }}:${{ secrets.APP_DB_PASS }}@127.0.0.1:3306/${{ secrets.APP_DB_NAME }}
+          file_name: .env.local
+
       - name: deploy
         run:
           sshpass -e ssh -p 9005 -o stricthostkeychecking=no ${{ secrets.APP_USER }}@${{ secrets.APP_HOST }}
@@ -26,5 +34,4 @@ jobs:
           composer install --no-progress --prefer-dist --optimize-autoloader &&
           php bin/console d:d:c &&
           php bin/console d:m:m -n"
-        env:
-          DATABASE_URL: mysql://${{ secrets.APP_DB_USER }}:${{ secrets.APP_DB_PASS }}@127.0.0.1:3306/${{ secrets.APP_DB_NAME }}
+
