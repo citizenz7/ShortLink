@@ -48,7 +48,7 @@ jobs:
           touch .env.local
           echo DATABASE_URL: mysql://${{ secrets.APP_DB_USER }}:${{ secrets.APP_DB_PASS }}@127.0.0.1:3306/${{ secrets.APP_DB_NAME }}?serverVersion=8.0.28 >> .env.local
           echo APP_ENV: prod >> .env.local
-          APP_DEBUG: false >> .env.local
+          echo APP_DEBUG: false >> .env.local
 
       - name: deploy
         run:
