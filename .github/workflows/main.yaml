@@ -56,4 +56,4 @@ jobs:
           "cd www/arakis.s2ii.xyz/ &&
           git pull &&
           composer install --no-progress --prefer-dist --optimize-autoloader &&
-
+          "
