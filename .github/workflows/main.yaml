@@ -18,7 +18,6 @@ jobs:
 
     env:
       SSHPASS: ${{ secrets.APP_PASS }}
-      DATABASE_URL: mysql://${{ secrets.APP_DB_USER }}:${{ secrets.APP_DB_PASS }}@127.0.0.1:3306/${{ secrets.APP_DB_NAME }}?serverVersion=8.0.28
 
     steps:
       - name: Checkout
@@ -28,7 +27,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: mbstring, xml, ctype, iconv, dom, filter, intl, pdo, pdo_mysql, json, gd, cmi, curl, zip, opcache, apcu
+          extensions: mbstring, xml, ctype, iconv, dom, filter, intl, mysql, pdo_mysql, json, gd, cmi, curl, zip, opcache, apcu
         env:
           update: true
 
@@ -44,6 +43,13 @@ jobs:
       #     envkey_DATABASE_URL: mysql://${{ secrets.APP_DB_USER }}:${{ secrets.APP_DB_PASS }}@127.0.0.1:3306/${{ secrets.APP_DB_NAME }}?serverVersion=8.0.28
       #     file_name: .env.local
 
+      - name: create .env.local file
+        run: |
+          touch .env.local
+          echo DATABASE_URL: mysql://${{ secrets.APP_DB_USER }}:${{ secrets.APP_DB_PASS }}@127.0.0.1:3306/${{ secrets.APP_DB_NAME }}?serverVersion=8.0.28 >> .env.local
+          echo APP_ENV: prod >> .env.local
+          APP_DEBUG: false >> .env.local
+
       - name: deploy
         run:
           sshpass -e ssh -p 9005 -o stricthostkeychecking=no ${{ secrets.APP_USER }}@${{ secrets.APP_HOST }}
@@ -52,4 +58,3 @@ jobs:
           composer install --no-progress --prefer-dist --optimize-autoloader &&
           php bin/console d:d:c &&
           php bin/console d:m:m -n"
-
