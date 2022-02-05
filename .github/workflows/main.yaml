@@ -11,80 +11,44 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    name: Deploy to prod
+    env:
+      SSHPASS: ${{ secrets.APP_PASS }}
 
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
-        php: ["7.4", "8.0"]
-        symfony: ["^4.4", "^5.2"]
-        node: ["10.x"]
-        mysql: ["5.7", "8.0"]
-        db_login: ['root']
-        db_password: ['7at7zsxN=Y!']
-        db_name: ['shortlink']
-
-    env:
-      APP_ENV: test_cached
-      DATABASE_URL: "mysql://${{ matrix.db_login }}:${{ matrix.db_password }}@127.0.0.1/${{ matrix.db_name }}"
+        php-versions: ['7.4']
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup PHP
+      - name: Setup PHP, extensions and composer
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "${{ matrix.php }}"
-          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_mysql, dom, filter, gd, iconv, json, mbstring
-          tools: symfony
-          coverage: none
+          php-version: ${{ matrix.php-versions }}
+          extensions: mbstring, xml, ctype, iconv, dom, filter, intl, pdo, pdo_mysql, json, gd, cmi, curl, zip, opcache, apcu
+        env:
+          update: true
 
-      - name: Shutdown default MySQL
-        run: sudo service mysql stop
+      - name: APT UPDATE and INSTALL SSHPASS
+        run:
+          sudo apt update && sudo apt install sshpass
 
-      - name: Setup MySQL
-        uses: mirromutth/mysql-action@v1.1
+      - name: Make .env production file
+        uses: SpicyPizza/create-envfile@v1
         with:
-          mysql version: "${{ matrix.mysql }}"
-          mysql root password: "${{ matrix.db_password }}"
+          envkey_APP_ENV: prod
+          envkey_APP_DEBUG: false
+          envkey_DATABASE_URL: mysql://${{ secrets.APP_DB_USER }}:${{ secrets.APP_DB_PASS }}@127.0.0.1:3306/${{ secrets.APP_DB_NAME }}
+          file_name: .env.local
 
-      - name: Install Composer dependencies
-        run: make install
-
-      - name: Output PHP version for Symfony CLI
-        run: php -v | head -n 1 | awk '{ print $2 }' > .php-version
-
-      - name: Run webserver
-        run: symfony server:start --port=8080 --dir=public --daemon
-
-      - name: Restrict Symfony version
-        if: matrix.symfony != ''
-        run: composer config extra.symfony.require "${{ matrix.symfony }}"
-
-      - name: Get Composer cache directory
-        id: composer-cache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
-
-      - name: Cache Composer
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.json **/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-php-${{ matrix.php }}-composer-
-
-      - name: Install PHP dependencies
-        run: composer install --no-interaction
-
-      - name: Prepare test application database
-        run: |
-          APP_DEBUG=1 bin/console doctrine:database:create -vvv
-          bin/console doctrine:migrations:migrate -n -vvv
-
-      - name: Validate composer.json
-        run: composer validate --ansi --strict --no-check-publish
-
-      - name: Validate database schema
-        run: bin/console doctrine:schema:validate
+      - name: deploy
+        run:
+          sshpass -e ssh -p 9005 -o stricthostkeychecking=no ${{ secrets.APP_USER }}@${{ secrets.APP_HOST }}
+          "cd www/arakis.s2ii.xyz/ &&
+          git pull &&
+          composer install --no-progress --prefer-dist --optimize-autoloader &&
+          php bin/console d:d:c &&
+          php bin/console d:m:m -n"
 
