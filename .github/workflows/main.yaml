@@ -27,7 +27,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: mbstring, xml, ctype, iconv, dom, filter, intl, mysql, pdo_mysql, json, gd, cmi, curl, zip, opcache, apcu
+          extensions: mbstring, xml, ctype, iconv, dom, filter, intl, mysql, pdo_mysql, json, gd, curl, zip, opcache, apcu
         env:
           update: true
 
@@ -56,5 +56,4 @@ jobs:
           "cd www/arakis.s2ii.xyz/ &&
           git pull &&
           composer install --no-progress --prefer-dist --optimize-autoloader &&
-          php bin/console d:d:c &&
-          php bin/console d:m:m -n"
+
