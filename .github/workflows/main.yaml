@@ -11,33 +11,18 @@ jobs:
       SSHPASS: ${{ secrets.APP_PASS }}
 
     steps:
-<<<<<<< HEAD
       - uses: actions/checkout@v2
-=======
-      - name: Git checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: '0'
->>>>>>> 6e8a5fef5d0e73aec8c5b0d8dc04315af097f6a1
 
       - name: APT UPDATE and INSTALL SSHPASS
         run:
           sudo apt update && sudo apt install sshpass
 
       - name: deploy
-<<<<<<< HEAD
         run:
-=======
-        run: |
->>>>>>> 6e8a5fef5d0e73aec8c5b0d8dc04315af097f6a1
           sshpass -e ssh -p 9005 -o stricthostkeychecking=no ${{ secrets.APP_USER }}@${{ secrets.APP_HOST }}
           "cd www/arakis.s2ii.xyz/ &&
           git pull &&
           composer install --no-progress --prefer-dist --optimize-autoloader &&
           php bin/console d:m:m -n"
         env:
-<<<<<<< HEAD
           DATABASE_URL: mysql://${{ secrets.APP_DB_USER }}:${{ secrets.APP_DB_PASS }}@127.0.0.1:3306/${{ secrets.APP_DB_NAME }}
-=======
-          DATABASE_URL: mysql://${{ secrets.APP_DB_USER }}:${{ secrets.APP_DB_PASS }}@127.0.0.1:3306/${{ secrets.APP_DB_NAME }}
->>>>>>> 6e8a5fef5d0e73aec8c5b0d8dc04315af097f6a1
