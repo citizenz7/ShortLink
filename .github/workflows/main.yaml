@@ -11,13 +11,14 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    env:
-      SSHPASS: ${{ secrets.APP_PASS }}
-
     strategy:
       fail-fast: true
       matrix:
         php-versions: ['7.4']
+
+    env:
+      SSHPASS: ${{ secrets.APP_PASS }}
+      DATABASE_URL: mysql://${{ secrets.APP_DB_USER }}:${{ secrets.APP_DB_PASS }}@127.0.0.1:3306/${{ secrets.APP_DB_NAME }}?serverVersion=8.0.28
 
     steps:
       - name: Checkout
@@ -35,13 +36,13 @@ jobs:
         run:
           sudo apt update && sudo apt install sshpass
 
-      - name: Make .env production file
-        uses: SpicyPizza/create-envfile@v1
-        with:
-          envkey_APP_ENV: prod
-          envkey_APP_DEBUG: false
-          envkey_DATABASE_URL: mysql://${{ secrets.APP_DB_USER }}:${{ secrets.APP_DB_PASS }}@127.0.0.1:3306/${{ secrets.APP_DB_NAME }}?serverVersion=8.0.28
-          file_name: .env.local
+      # - name: Make .env.local production file
+      #   uses: SpicyPizza/create-envfile@v1
+      #   with:
+      #     envkey_APP_ENV: prod
+      #     envkey_APP_DEBUG: false
+      #     envkey_DATABASE_URL: mysql://${{ secrets.APP_DB_USER }}:${{ secrets.APP_DB_PASS }}@127.0.0.1:3306/${{ secrets.APP_DB_NAME }}?serverVersion=8.0.28
+      #     file_name: .env.local
 
       - name: deploy
         run:
